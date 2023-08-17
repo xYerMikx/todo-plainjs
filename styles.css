@@ -67,3 +67,26 @@ li span {
 .odd {
   background-color: #5aa9e9;
 }
+
+button:hover {
+  box-shadow: 3px 3px 7px rgba(0,0,0,0.5);
+}
+
+button:focus {
+  outline: none;
+}
+
+button:active {
+  box-shadow: none;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
