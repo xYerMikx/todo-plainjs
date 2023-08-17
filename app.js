@@ -11,34 +11,38 @@ class TodoList {
     this.add.addEventListener("click", () => this.addTask());
     this.even.addEventListener("click", () => this.highlightEven());
     this.odd.addEventListener("click", () => this.highlightOdd());
-    this.removeLast.addEventListener("click", () => this.removeLastTask());
-    this.removeFirst.addEventListener("click", () => this.removeFirstTask());
+    this.removeLast.addEventListener("click", () =>
+      this.removeTask(this.list.lastElementChild)
+    );
+    this.removeFirst.addEventListener("click", () =>
+      this.removeTask(this.list.firstElementChild)
+    );
 
     this.loadTasks();
+  }
+
+  renderTask(taskText) {
+    const li = document.createElement("li");
+    li.style.animation = "fadeIn 0.5s";
+    const span = document.createElement("span");
+    span.textContent = taskText;
+    li.appendChild(span);
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.classList.add("buttons");
+    li.appendChild(buttonsContainer);
+    const buttons = [
+      new Button("Завершить", "complete-btn", () => this.completeTask(li)),
+      new Button("Удалить", "remove-btn", () => this.removeTask(li)),
+    ];
+    buttons.forEach((button) => button.appendTo(buttonsContainer));
+    return li;
   }
 
   addTask() {
     const task = this.input.value;
     if (task) {
-      const li = document.createElement("li");
-      li.style.animation = "fadeIn 0.5s";
-      const span = document.createElement("span");
-      span.textContent = task;
-      li.appendChild(span);
-      const buttons = document.createElement("div");
-      buttons.classList.add("buttons");
-      li.appendChild(buttons);
-      const completeButton = document.createElement("button");
-      completeButton.textContent = "Complete";
-      completeButton.classList.add("complete-btn");
-      completeButton.addEventListener("click", () => this.completeTask(li));
-      buttons.appendChild(completeButton);
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.classList.add("remove-btn");
-      removeButton.addEventListener("click", () => this.removeTask(li));
-      buttons.appendChild(removeButton);
-      li.dataset.index = Array.from(this.list.children).length;
+      const li = this.renderTask(task);
+      li.dataset.index = [...this.list.children].length;
       this.list.appendChild(li);
       this.input.value = "";
       this.saveTasks();
@@ -51,7 +55,7 @@ class TodoList {
       this.list.appendChild(li);
     } else {
       const index = parseInt(li.dataset.index);
-      const tasks = Array.from(this.list.children);
+      const tasks = [...this.list.children];
       if (index === 0) {
         this.list.insertBefore(li, tasks[0]);
       } else if (index === tasks.length - 1) {
@@ -69,51 +73,27 @@ class TodoList {
   }
 
   removeTask(li) {
-    li.style.animation = "fadeOut 0.5s";
-    setTimeout(() => {
-      li.remove();
-      this.saveTasks();
-    }, 500);
-  }
-
-  removeLastTask() {
-    const lastChild = this.list.lastElementChild;
-    if (lastChild) {
-      lastChild.style.animation = "fadeOut 0.5s";
+    if (li) {
+      li.style.animation = "fadeOut 0.5s";
       setTimeout(() => {
-        lastChild.remove();
+        li.remove();
         this.saveTasks();
       }, 500);
     }
-  }
-
-  removeFirstTask() {
-    const firstChild = this.list.firstElementChild;
-    if (firstChild) {
-      firstChild.style.animation = "fadeOut 0.5s";
-      setTimeout(() => {
-        firstChild.remove();
-        this.saveTasks();
-      }, 500);
-    }
-  }
-
-  highlightEven() {
-    const evenTasks = Array.from(this.list.children).filter(
-      (_, i) => i % 2 === 0
-    );
-    evenTasks.forEach((task) => task.classList.toggle("even"));
   }
 
   highlightOdd() {
-    const oddTasks = Array.from(this.list.children).filter(
-      (_, i) => i % 2 === 1
-    );
-    oddTasks.forEach((task) => task.classList.toggle("odd"));
+    const evenTasks = [...this.list.children].filter((_, i) => i % 2 === 0);
+    evenTasks.forEach((task) => task.classList.toggle("odd"));
+  }
+
+  highlightEven() {
+    const oddTasks = [...this.list.children].filter((_, i) => i % 2 === 1);
+    oddTasks.forEach((task) => task.classList.toggle("even"));
   }
 
   saveTasks() {
-    const tasks = Array.from(this.list.children).map((task) => ({
+    const tasks = [...this.list.children].map((task) => ({
       text: task.firstChild.textContent,
       complete: task.classList.contains("complete"),
       index: parseInt(task.dataset.index),
@@ -125,32 +105,25 @@ class TodoList {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     tasks.sort((a, b) => a.index - b.index);
     tasks.forEach((task) => {
-      const li = document.createElement("li");
-      const span = document.createElement("span");
-      li.style.animation = "fadeIn 0.5s";
-      span.textContent = task.text;
-      li.appendChild(span);
-      if (task.complete) li.classList.add("complete");
-      const buttons = document.createElement("div");
-      buttons.classList.add("buttons");
-      li.appendChild(buttons);
-      const completeButton = document.createElement("button");
-      completeButton.textContent = "Complete";
-      completeButton.classList.add("complete-btn");
-      completeButton.addEventListener("click", () => this.completeTask(li));
-      buttons.appendChild(completeButton);
-      const removeButton = document.createElement("button");
-      removeButton.textContent = "Remove";
-      removeButton.classList.add("remove-btn");
-      removeButton.addEventListener("click", () => this.removeTask(li));
-      buttons.appendChild(removeButton);
+      const li = this.renderTask(task.text);
       li.dataset.index = task.index;
-      if (task.complete) {
-        this.list.appendChild(li);
-      } else {
-        this.list.insertBefore(li, this.list.firstChild);
-      }
+      task.complete
+        ? this.list.appendChild(li)
+        : this.list.insertBefore(li, this.list.firstChild);
     });
+  }
+}
+
+class Button {
+  constructor(text, className, listener) {
+    this.button = document.createElement("button");
+    this.button.textContent = text;
+    this.button.classList.add(className);
+    this.button.addEventListener("click", listener);
+  }
+
+  appendTo(parent) {
+    parent.appendChild(this.button);
   }
 }
 
