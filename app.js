@@ -21,17 +21,23 @@ class TodoList {
     const task = this.input.value;
     if (task) {
       const li = document.createElement("li");
+      li.style.animation = "fadeIn 0.5s";
       const span = document.createElement("span");
       span.textContent = task;
       li.appendChild(span);
+      const buttons = document.createElement("div");
+      buttons.classList.add("buttons");
+      li.appendChild(buttons);
       const completeButton = document.createElement("button");
       completeButton.textContent = "Complete";
+      completeButton.classList.add("complete-btn");
       completeButton.addEventListener("click", () => this.completeTask(li));
-      li.appendChild(completeButton);
+      buttons.appendChild(completeButton);
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
+      removeButton.classList.add("remove-btn");
       removeButton.addEventListener("click", () => this.removeTask(li));
-      li.appendChild(removeButton);
+      buttons.appendChild(removeButton);
       li.dataset.index = Array.from(this.list.children).length;
       this.list.appendChild(li);
       this.input.value = "";
@@ -63,23 +69,32 @@ class TodoList {
   }
 
   removeTask(li) {
-    li.remove();
-    this.saveTasks();
+    li.style.animation = "fadeOut 0.5s";
+    setTimeout(() => {
+      li.remove();
+      this.saveTasks();
+    }, 500);
   }
 
   removeLastTask() {
     const lastChild = this.list.lastElementChild;
     if (lastChild) {
-      lastChild.remove();
-      this.saveTasks();
+      lastChild.style.animation = "fadeOut 0.5s";
+      setTimeout(() => {
+        lastChild.remove();
+        this.saveTasks();
+      }, 500);
     }
   }
 
   removeFirstTask() {
     const firstChild = this.list.firstElementChild;
     if (firstChild) {
-      firstChild.remove();
-      this.saveTasks();
+      firstChild.style.animation = "fadeOut 0.5s";
+      setTimeout(() => {
+        firstChild.remove();
+        this.saveTasks();
+      }, 500);
     }
   }
 
@@ -112,20 +127,21 @@ class TodoList {
     tasks.forEach((task) => {
       const li = document.createElement("li");
       const span = document.createElement("span");
+      li.style.animation = "fadeIn 0.5s";
       span.textContent = task.text;
       li.appendChild(span);
       if (task.complete) li.classList.add("complete");
       const buttons = document.createElement("div");
       buttons.classList.add("buttons");
-      li.appendChild(buttons)
+      li.appendChild(buttons);
       const completeButton = document.createElement("button");
       completeButton.textContent = "Complete";
-      completeButton.classList.add("complete-btn")
+      completeButton.classList.add("complete-btn");
       completeButton.addEventListener("click", () => this.completeTask(li));
       buttons.appendChild(completeButton);
       const removeButton = document.createElement("button");
       removeButton.textContent = "Remove";
-      removeButton.classList.add("remove-btn")
+      removeButton.classList.add("remove-btn");
       removeButton.addEventListener("click", () => this.removeTask(li));
       buttons.appendChild(removeButton);
       li.dataset.index = task.index;
